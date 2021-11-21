@@ -19,17 +19,17 @@ export default {
   border: 0.125em solid #2aa694;
   border-radius: 0.5em;
   background-color: #2aa694;
-  box-shadow: 0 2.5px 5px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0.125em 0.25em rgba(0, 0, 0, 0.2);
   transition: color 0.2s, background-color 0.2s, box-shadow 0.2s, transform 0.2s;
   &:hover {
     color: #2aa694;
     cursor: pointer;
     background-color: #fff;
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-    transform: translateY(-3px);
+    box-shadow: 0 0.25em 0.5em rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
   }
   &:active {
-    box-shadow: 0 2.5px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0.125em 0.25em rgba(0, 0, 0, 0.2);
     transform: translateY(-1px);
   }
 }
