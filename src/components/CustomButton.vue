@@ -22,7 +22,7 @@ export default {
   position: relative;
   display: flex;
   justify-content: space-between;
-  padding: 0.625em;
+  padding: 0.5em;
   font-size: 1.25rem;
   line-height: 1.2;
   text-transform: uppercase;
