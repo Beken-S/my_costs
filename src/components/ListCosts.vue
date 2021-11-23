@@ -1,20 +1,20 @@
 <template>
-  <div :class="$style.listCostsWrapper">
-    <table :class="$style.listCosts" v-if="isNotEmpty">
+  <div :class="$style.wrapper">
+    <table :class="$style.list" v-if="isNotEmpty">
       <thead>
         <tr>
           <th>#</th>
           <th>Date</th>
-          <th>Category</th>
-          <th>Value</th>
+          <th>Description</th>
+          <th>Amount</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in items" :key="index">
           <td>{{ index + 1 }}</td>
+          <td>{{ item.description }}</td>
           <td>{{ item.date }}</td>
-          <td>{{ item.category }}</td>
-          <td>{{ item.value }}</td>
+          <td>{{ item.amount }}</td>
         </tr>
       </tbody>
     </table>
@@ -30,11 +30,11 @@ export default {
       default: () => [],
       validator(items) {
         return items.every((item) => {
-          if ('date' in item && 'category' in item && 'value' in item) {
+          if ('date' in item && 'description' in item && 'amount' in item) {
             const dateValid = typeof item.date === 'string';
-            const categoryValid = typeof item.category === 'string';
-            const valueValid = typeof item.value === 'number';
-            return dateValid && categoryValid && valueValid;
+            const descriptionValid = typeof item.description === 'string';
+            const amountValid = typeof item.amount === 'number';
+            return dateValid && descriptionValid && amountValid;
           }
           return false;
         });
@@ -53,12 +53,11 @@ export default {
 </script>
 
 <style module lang="scss">
-.listCostsWrapper {
+.wrapper {
   width: 100%;
-  padding: 0 20px;
   overflow-x: auto;
 }
-.listCosts {
+.list {
   width: 100%;
   font-size: 1.25rem;
   border-collapse: collapse;
