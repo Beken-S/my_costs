@@ -34,33 +34,39 @@ export default {
     fetchData() {
       return [
         {
+          id: 1,
           date: '28.03.2020',
           description: 'Food',
           amount: 169,
         },
         {
+          id: 2,
           date: '24.03.2020',
           description: 'Transport',
           amount: 360,
         },
         {
+          id: 3,
           date: '24.03.2020',
           description: 'Food',
           amount: 532,
         },
         {
+          id: 4,
           date: '24.03.2020',
           description: 'Food',
           amount: 532,
         },
         {
+          id: 5,
           date: '24.03.2020',
           description: 'Food',
           amount: 532,
         },
       ];
     },
-    addPayment(payment) {
+    addPayment(data) {
+      const payment = { id: this.listCosts.length + 1, ...data };
       this.listCosts.push(payment);
     },
     showForm() {
