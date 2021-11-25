@@ -31,6 +31,7 @@ export default {
 <style module lang="scss">
 .main {
   display: flex;
+  flex-wrap:wrap;
   align-items: center;
   padding: 0.5em;
   font-size: 1.25rem;
@@ -61,7 +62,7 @@ export default {
   transition: fill 0.2s;
 }
 .text {
-  flex: 1 0 auto;
+  flex: 1 1 auto;
   text-align: center;
   text-transform: uppercase;
 }

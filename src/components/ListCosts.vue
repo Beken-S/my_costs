@@ -1,29 +1,31 @@
 <template>
-  <div :class="$style.wrapper">
-    <table :class="$style.list" v-if="isNotEmpty">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Description</th>
-          <th>Date</th>
-          <th>Amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="item in filteredItems" :key="item.id">
-          <td>{{ item.id }}</td>
-          <td>{{ item.description }}</td>
-          <td>{{ item.date }}</td>
-          <td>{{ item.amount }}</td>
-        </tr>
-      </tbody>
-    </table>
+  <div>
+    <div :class="$style.wrapper">
+      <table :class="$style.list" v-if="isNotEmpty">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Description</th>
+            <th>Date</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in filteredItems" :key="item.id">
+            <td>{{ item.id }}</td>
+            <td>{{ item.description }}</td>
+            <td>{{ item.date }}</td>
+            <td>{{ item.amount }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <custom-pagination
-      v-if="numberPages > 1"
       :class="$style.pagination"
-      :numberPages="numberPages"
-      :displayedPages="5"
-      @change-page="setCurrent"
+      :numberItems="numberItems"
+      :itemsPerPage="5"
+      :numberButtonsDisplayed="5"
+      @change-page="setFilterRange"
     />
   </div>
 </template>
@@ -60,7 +62,7 @@ export default {
   },
   data() {
     return {
-      currentPage: 0,
+      filterRange: {},
     };
   },
   computed: {
@@ -70,25 +72,17 @@ export default {
       }
       return true;
     },
-    numberPages() {
-      return Math.ceil(this.items.length / this.itemsPerPage);
-    },
     numberItems() {
       return this.items.length;
     },
     filteredItems() {
-      const { currentPage, itemsPerPage, numberItems } = this;
-      const start = currentPage * itemsPerPage;
-      const end = start + itemsPerPage;
-      if (end > numberItems) {
-        return this.items.slice(start, numberItems);
-      }
+      const { start, end } = this.filterRange;
       return this.items.slice(start, end);
     },
   },
   methods: {
-    setCurrent(page) {
-      this.currentPage = page;
+    setFilterRange(range) {
+      this.filterRange = { ...range };
     },
   },
 };
@@ -103,6 +97,7 @@ export default {
   width: 100%;
   font-size: 1.25rem;
   border-collapse: collapse;
+
   & thead {
     color: #fff;
     background-color: #2aa694;
@@ -110,8 +105,9 @@ export default {
   & tbody {
     color: #2c3e50;
     & tr {
-      border-bottom: 0.05em solid #c2c2c2;
-
+      &:not(:last-child) {
+        border-bottom: 1px solid #c2c2c2;
+      }
       &:hover {
         background-color: lighten(#2aa694, 55%);
       }
@@ -123,7 +119,4 @@ export default {
     text-align: center;
   }
 }
-.pagination {
-    border-top: none;
-  }
 </style>
