@@ -3,7 +3,6 @@
     <button :class="$style.button" @click="prevPage">
       <svg
         :class="$style.icon"
-        width="0.6em"
         viewBox="0 0 13 23"
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -14,17 +13,16 @@
       </svg>
     </button>
     <button
-      :class="{[$style.current]:page.current, [$style.button]: true}"
-      v-for="page in range"
-      :key="page.id"
-      @click="setCurrentPage(page.id)"
+      :class="{[$style.current]:button.current, [$style.button]: true}"
+      v-for="button in displayedButtons"
+      :key="button.page"
+      @click="setCurrentPage(button.page)"
     >
-      {{ page.id + 1 }}
+      {{ button.page + 1 }}
     </button>
     <button :class="$style.button" @click="nextPage">
       <svg
         :class="$style.icon"
-        width="0.6em"
         viewBox="0 0 13 23"
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -41,13 +39,17 @@
 export default {
   name: 'CustomPagination',
   props: {
-    displayedPages: {
+    numberButtonsDisplayed: {
       type: Number,
       required: true,
     },
-    numberPages: {
+    numberItems: {
       type: Number,
-      default: 1,
+      required: true,
+    },
+    itemsPerPage: {
+      type: Number,
+      default: 5,
     },
   },
   data() {
@@ -56,79 +58,92 @@ export default {
     };
   },
   computed: {
-    pages() {
+    numberPages() {
+      const { numberItems, itemsPerPage } = this;
+      return Math.ceil(numberItems / itemsPerPage);
+    },
+    pageRange() {
+      const { currentPage, itemsPerPage, numberItems } = this;
+      const start = currentPage * itemsPerPage;
+      const end = start + itemsPerPage;
+      return { start, end: end > numberItems ? numberItems : end };
+    },
+    pageButtons() {
       const { numberPages, currentPage } = this;
-      const pages = [];
+      const buttons = [];
       for (let i = 0; i < numberPages; i += 1) {
-        pages[i] = {
-          id: i,
+        buttons[i] = {
+          page: i,
           current: currentPage === i,
         };
       }
-      return pages;
+      return buttons;
     },
     isScrolling() {
-      const { displayedPages, numberPages } = this;
-      return displayedPages < numberPages;
+      const { numberButtonsDisplayed, numberPages } = this;
+      return numberButtonsDisplayed < numberPages;
     },
     startScrolling() {
-      return Math.round(this.displayedPages / 2) - 1;
+      return Math.round(this.numberButtonsDisplayed / 2) - 1;
     },
     endScrolling() {
       const { startScrolling, numberPages } = this;
       return numberPages - startScrolling;
     },
-    range() {
+    displayedButtons() {
       const {
-        isScrolling, startScrolling, endScrolling, numberPages, displayedPages, currentPage,
+        isScrolling, startScrolling, endScrolling, numberPages, numberButtonsDisplayed, currentPage,
       } = this;
-      const range = { start: 0, end: displayedPages };
+      const range = { start: 0, end: numberButtonsDisplayed };
 
       if (!isScrolling) {
         range.end = numberPages;
       } else if (currentPage > startScrolling) {
         if (currentPage < endScrolling) {
           range.start = currentPage - startScrolling;
-          range.end = range.start + displayedPages;
+          range.end = range.start + numberButtonsDisplayed;
         } else {
           range.end = numberPages;
-          range.start = range.end - displayedPages;
+          range.start = range.end - numberButtonsDisplayed;
         }
       }
-      return this.pages.slice(range.start, range.end);
+      return this.pageButtons.slice(range.start, range.end);
     },
   },
   methods: {
     nextPage() {
-      const { currentPage: pos, numberPages, pages } = this;
+      const { currentPage: current, numberPages, pageButtons } = this;
       const end = numberPages - 1;
-      if (pos < end) {
-        const page = pos + 1;
-        pages[pos].current = false;
-        pages[page].current = true;
-        this.currentPage = page;
-        this.$emit('change-page', page);
+      if (current < end) {
+        const next = current + 1;
+        pageButtons[current].current = false;
+        pageButtons[next].current = true;
+        this.currentPage = next;
+        this.$emit('change-page', this.pageRange);
       }
     },
     prevPage() {
-      const { currentPage: pos, pages } = this;
-      if (pos > 0) {
-        const page = pos - 1;
-        pages[pos].current = false;
-        pages[page].current = true;
-        this.currentPage = page;
-        this.$emit('change-page', page);
+      const { currentPage: current, pageButtons } = this;
+      if (current > 0) {
+        const prev = current - 1;
+        pageButtons[current].current = false;
+        pageButtons[prev].current = true;
+        this.currentPage = prev;
+        this.$emit('change-page', this.pageRange);
       }
     },
     setCurrentPage(page) {
-      const { numberPages: end, currentPage: pos, pages } = this;
+      const { numberPages: end, currentPage: current, pageButtons } = this;
       if (page >= 0 && page <= end) {
-        pages[pos].current = false;
-        pages[page].current = true;
+        pageButtons[current].current = false;
+        pageButtons[page].current = true;
         this.currentPage = page;
-        this.$emit('change-page', page);
+        this.$emit('change-page', this.pageRange);
       }
     },
+  },
+  mounted() {
+    this.$emit('change-page', this.pageRange);
   },
 };
 </script>
@@ -136,14 +151,15 @@ export default {
 <style module lang="scss">
   .pagination {
     display: flex;
+    font-size: 1.25rem;
     justify-content: center;
-    border: 1px solid #c2c2c2;
+    border: 0.05em solid #c2c2c2;
   }
   .button {
     display:flex;
     align-items: center;
     padding: 0.5em 0.6em;
-    font-size: 1.1rem;
+    font-size: 1.125rem;
     color: #2c3e50;
     border: none;
     background-color: #fff;
@@ -156,6 +172,7 @@ export default {
     }
   }
   .icon {
+    width: 0.45em;
     fill: #2c3e50;
     transition: fill 0.2s;
   }
