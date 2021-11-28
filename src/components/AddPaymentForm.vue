@@ -4,7 +4,8 @@
       :class="$style.input"
       type="text"
       placeholder="Payment description"
-      v-model="description" />
+      v-model="description"
+    />
     <input :class="$style.input" type="text" placeholder="Payment amount" v-model.number="amount" />
     <input :class="$style.input" type="text" placeholder="Payment date" v-model="date" />
     <custom-button :class="$style.button" @click="addPayment" add>Add</custom-button>
