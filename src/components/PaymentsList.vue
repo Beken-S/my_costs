@@ -1,7 +1,7 @@
 <template>
   <div>
     <div :class="$style.wrapper">
-      <table :class="$style.list" v-if="isNotEmpty">
+      <table :class="$style.list">
         <thead>
           <tr>
             <th>#</th>
@@ -11,22 +11,16 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in filteredItems" :key="item.id">
+          <tr v-for="item in items" :key="item.id">
             <td>{{ item.id }}</td>
-            <td>{{ item.description }}</td>
+            <td>{{ item.category }}</td>
             <td>{{ item.date }}</td>
             <td>{{ item.amount }}</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <custom-pagination
-      :class="$style.pagination"
-      :numberItems="numberItems"
-      :itemsPerPage="5"
-      :numberButtonsDisplayed="5"
-      @change-page="setFilterRange"
-    />
+    <custom-pagination :class="$style.pagination" :buttonsDisplayedCount="5" />
   </div>
 </template>
 
@@ -34,7 +28,7 @@
 import CustomPagination from './CustomPagination.vue';
 
 export default {
-  name: 'ListCosts',
+  name: 'PaymentsList',
   components: {
     CustomPagination,
   },
@@ -44,45 +38,16 @@ export default {
       default: () => [],
       validator(items) {
         return items.every((item) => {
-          if ('id' in item && 'date' in item && 'description' in item && 'amount' in item) {
+          if ('id' in item && 'date' in item && 'category' in item && 'amount' in item) {
             const idValid = typeof item.id === 'number';
             const dateValid = typeof item.date === 'string';
-            const descriptionValid = typeof item.description === 'string';
+            const categoryValid = typeof item.category === 'string';
             const amountValid = typeof item.amount === 'number';
-            return idValid && dateValid && descriptionValid && amountValid;
+            return idValid && dateValid && categoryValid && amountValid;
           }
           return false;
         });
       },
-    },
-    itemsPerPage: {
-      type: Number,
-      default: 5,
-    },
-  },
-  data() {
-    return {
-      filterRange: {},
-    };
-  },
-  computed: {
-    isNotEmpty() {
-      if (this.items.length === 0) {
-        return false;
-      }
-      return true;
-    },
-    numberItems() {
-      return this.items.length;
-    },
-    filteredItems() {
-      const { start, end } = this.filterRange;
-      return this.items.slice(start, end);
-    },
-  },
-  methods: {
-    setFilterRange(range) {
-      this.filterRange = { ...range };
     },
   },
 };

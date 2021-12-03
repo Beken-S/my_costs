@@ -3,9 +3,17 @@
     <div class="wrapper__content">
       <div class="container">
         <div class="content">
-          <custom-button class="button" @click="showForm" add> Add new costs </custom-button>
-          <add-payment-form class="form" v-if="formVisible" @add-payment="addPayment" />
-          <list-costs class="list" :items="listCosts" />
+          <custom-button class="button" @click="changeFormVisibility" add>
+            Add new costs
+          </custom-button>
+          <div class="form form-wrapper" v-if="isFormVisible">
+            <add-payment-form v-if="isAddPaymentVisible" />
+            <custom-button v-if="isAddPaymentVisible" @click="switchForm">
+              Add category
+            </custom-button>
+            <add-category-form v-if="isAddCategoryVisible" @close="switchForm" />
+          </div>
+          <payments-list class="list" :items="currentPageData" />
         </div>
       </div>
     </div>
@@ -13,68 +21,46 @@
 </template>
 
 <script>
+import { mapGetters, mapMutations, mapActions } from 'vuex';
 import CustomButton from './components/CustomButton.vue';
-import ListCosts from './components/ListCosts.vue';
+import PaymentsList from './components/PaymentsList.vue';
 import AddPaymentForm from './components/AddPaymentForm.vue';
+import AddCategoryForm from './components/AddCategoryForm.vue';
 
 export default {
   name: 'App',
   data() {
     return {
-      formVisible: false,
-      listCosts: [],
+      isFormVisible: false,
+      isAddPaymentVisible: true,
+      isAddCategoryVisible: false,
     };
+  },
+  computed: {
+    ...mapGetters(['pageCount', 'currentPageData']),
   },
   components: {
     AddPaymentForm,
-    ListCosts,
+    PaymentsList,
     CustomButton,
+    AddCategoryForm,
   },
   methods: {
-    fetchData() {
-      return [
-        {
-          id: 1,
-          date: '28.03.2020',
-          description: 'Food',
-          amount: 169,
-        },
-        {
-          id: 2,
-          date: '24.03.2020',
-          description: 'Transport',
-          amount: 360,
-        },
-        {
-          id: 3,
-          date: '24.03.2020',
-          description: 'Food',
-          amount: 532,
-        },
-        {
-          id: 4,
-          date: '24.03.2020',
-          description: 'Food',
-          amount: 532,
-        },
-        {
-          id: 5,
-          date: '24.03.2020',
-          description: 'Food',
-          amount: 532,
-        },
-      ];
+    ...mapMutations(['setCurrentPageNumber', 'addPage']),
+    ...mapActions(['fetchPages', 'fetchData', 'fetchCategory']),
+    changeFormVisibility() {
+      this.isFormVisible = !this.isFormVisible;
     },
-    addPayment(data) {
-      const payment = { id: this.listCosts.length + 1, ...data };
-      this.listCosts.push(payment);
-    },
-    showForm() {
-      this.formVisible = !this.formVisible;
+    switchForm() {
+      this.isAddPaymentVisible = !this.isAddPaymentVisible;
+      this.isAddCategoryVisible = !this.isAddCategoryVisible;
     },
   },
   created() {
-    this.listCosts = this.fetchData();
+    this.fetchPages()
+      .then(() => (this.pageCount > 0 ? this.fetchData(1) : this.addPage({ number: 1, data: [] })))
+      .then(() => this.setCurrentPageNumber(1));
+    this.fetchCategory();
   },
 };
 </script>
@@ -120,6 +106,11 @@ export default {
 .footer {
   min-height: 75px;
   background-color: #686868;
+}
+.form-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
 }
 .form {
   grid-column: 1;
