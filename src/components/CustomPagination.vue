@@ -1,6 +1,6 @@
 <template>
   <nav :class="$style.pagination">
-    <button :class="$style.button" @click="prevPage">
+    <button :class="$style.button" @click="setPrevPage">
       <svg :class="$style.icon" viewBox="0 0 13 23" xmlns="http://www.w3.org/2000/svg">
         <path
           d="M12.6998 3.7499L4.9498 11.4999L12.6998 19.2499L11.1498 22.3499L0.299805
@@ -9,14 +9,14 @@
       </svg>
     </button>
     <button
-      :class="{ [$style.current]: button.current, [$style.button]: true }"
+      :class="{ [$style.current]: isCurrentPage(button.number), [$style.button]: true }"
       v-for="button in displayedButtons"
-      :key="button.page"
-      @click="setCurrentPage(button.page)"
+      :key="button.number"
+      @click="setPage(button.number)"
     >
-      {{ button.page + 1 }}
+      {{ button.number }}
     </button>
-    <button :class="$style.button" @click="nextPage">
+    <button :class="$style.button" @click="setNextPage">
       <svg :class="$style.icon" viewBox="0 0 13 23" xmlns="http://www.w3.org/2000/svg">
         <path
           d="M12.6998 3.7499L4.9498 11.4999L12.6998 19.2499L11.1498 22.3499L0.299805
@@ -29,119 +29,73 @@
 </template>
 
 <script>
+import { mapState, mapGetters, mapMutations, mapActions } from 'vuex';
+
 export default {
   name: 'CustomPagination',
   props: {
-    numberButtonsDisplayed: {
+    buttonsDisplayedCount: {
       type: Number,
       required: true,
     },
-    numberItems: {
-      type: Number,
-      required: true,
-    },
-    itemsPerPage: {
-      type: Number,
-      default: 5,
-    },
-  },
-  data() {
-    return {
-      currentPage: 0,
-    };
   },
   computed: {
-    numberPages() {
-      const { numberItems, itemsPerPage } = this;
-      return Math.ceil(numberItems / itemsPerPage);
-    },
-    pageRange() {
-      const { currentPage, itemsPerPage, numberItems } = this;
-      const start = currentPage * itemsPerPage;
-      const end = start + itemsPerPage;
-      return { start, end: end > numberItems ? numberItems : end };
-    },
-    pageButtons() {
-      const { numberPages, currentPage } = this;
-      const buttons = [];
-      for (let i = 0; i < numberPages; i += 1) {
-        buttons[i] = {
-          page: i,
-          current: currentPage === i,
-        };
-      }
-      return buttons;
-    },
+    ...mapState(['paymentsList', 'currentPageNumber']),
+    ...mapGetters(['pageCount', 'isDataEmpty', 'isCurrentPage']),
     isScrolling() {
-      const { numberButtonsDisplayed, numberPages } = this;
-      return numberButtonsDisplayed < numberPages;
+      const { buttonsDisplayedCount, pageCount } = this;
+      return buttonsDisplayedCount < pageCount;
     },
     startScrolling() {
-      return Math.round(this.numberButtonsDisplayed / 2) - 1;
+      return Math.round(this.buttonsDisplayedCount / 2);
     },
     endScrolling() {
-      const { startScrolling, numberPages } = this;
-      return numberPages - startScrolling;
+      const { startScrolling, pageCount } = this;
+      return pageCount - startScrolling + 1;
     },
     displayedButtons() {
       const {
         isScrolling,
         startScrolling,
         endScrolling,
-        numberPages,
-        numberButtonsDisplayed,
-        currentPage,
+        pageCount,
+        buttonsDisplayedCount,
+        currentPageNumber,
       } = this;
-      const range = { start: 0, end: numberButtonsDisplayed };
+      const range = { start: 0, end: buttonsDisplayedCount };
 
       if (!isScrolling) {
-        range.end = numberPages;
-      } else if (currentPage > startScrolling) {
-        if (currentPage < endScrolling) {
-          range.start = currentPage - startScrolling;
-          range.end = range.start + numberButtonsDisplayed;
+        range.end = pageCount;
+      } else if (currentPageNumber > startScrolling) {
+        if (currentPageNumber < endScrolling) {
+          range.start = currentPageNumber - startScrolling;
+          range.end = range.start + buttonsDisplayedCount;
         } else {
-          range.end = numberPages;
-          range.start = range.end - numberButtonsDisplayed;
+          range.end = pageCount;
+          range.start = range.end - buttonsDisplayedCount;
         }
       }
-      return this.pageButtons.slice(range.start, range.end);
+      return this.paymentsList.slice(range.start, range.end);
     },
   },
   methods: {
-    nextPage() {
-      const { currentPage: current, numberPages, pageButtons } = this;
-      const end = numberPages - 1;
-      if (current < end) {
-        const next = current + 1;
-        pageButtons[current].current = false;
-        pageButtons[next].current = true;
-        this.currentPage = next;
-        this.$emit('change-page', this.pageRange);
-      }
+    ...mapMutations(['setCurrentPageNumber']),
+    ...mapActions(['fetchData']),
+    setPage(number) {
+      const { fetchData, setCurrentPageNumber } = this;
+      fetchData(number);
+      setCurrentPageNumber(number);
     },
-    prevPage() {
-      const { currentPage: current, pageButtons } = this;
-      if (current > 0) {
-        const prev = current - 1;
-        pageButtons[current].current = false;
-        pageButtons[prev].current = true;
-        this.currentPage = prev;
-        this.$emit('change-page', this.pageRange);
-      }
+    setNextPage() {
+      const { currentPageNumber, pageCount, setPage } = this;
+      const nextPage = currentPageNumber < pageCount ? currentPageNumber + 1 : pageCount;
+      setPage(nextPage);
     },
-    setCurrentPage(page) {
-      const { numberPages: end, currentPage: current, pageButtons } = this;
-      if (page >= 0 && page <= end) {
-        pageButtons[current].current = false;
-        pageButtons[page].current = true;
-        this.currentPage = page;
-        this.$emit('change-page', this.pageRange);
-      }
+    setPrevPage() {
+      const { currentPageNumber, setPage } = this;
+      const prevPage = currentPageNumber > 1 ? currentPageNumber - 1 : 1;
+      setPage(prevPage);
     },
-  },
-  mounted() {
-    this.$emit('change-page', this.pageRange);
   },
 };
 </script>
