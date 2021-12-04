@@ -25,7 +25,7 @@ export default {
     add() {
       const { category, categoryList, addCategory } = this;
       const contains = categoryList.some((item) => item === category);
-      if (!contains) {
+      if (category && !contains) {
         addCategory(category);
       }
     },

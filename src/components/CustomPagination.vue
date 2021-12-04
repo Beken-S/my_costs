@@ -9,12 +9,12 @@
       </svg>
     </button>
     <button
-      :class="{ [$style.current]: isCurrentPage(button.number), [$style.button]: true }"
+      :class="{ [$style.current]: isCurrentPage(button), [$style.button]: true }"
       v-for="button in displayedButtons"
-      :key="button.number"
-      @click="setPage(button.number)"
+      :key="button"
+      @click="setPage(button)"
     >
-      {{ button.number }}
+      {{ button }}
     </button>
     <button :class="$style.button" @click="setNextPage">
       <svg :class="$style.icon" viewBox="0 0 13 23" xmlns="http://www.w3.org/2000/svg">
@@ -29,7 +29,12 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapMutations, mapActions } from 'vuex';
+import {
+  mapState,
+  mapGetters,
+  mapMutations,
+  mapActions,
+} from 'vuex';
 
 export default {
   name: 'CustomPagination',
@@ -40,42 +45,54 @@ export default {
     },
   },
   computed: {
-    ...mapState(['paymentsList', 'currentPageNumber']),
+    ...mapState(['currentPageNumber']),
     ...mapGetters(['pageCount', 'isDataEmpty', 'isCurrentPage']),
     isScrolling() {
       const { buttonsDisplayedCount, pageCount } = this;
       return buttonsDisplayedCount < pageCount;
     },
     startScrolling() {
-      return Math.round(this.buttonsDisplayedCount / 2);
+      const { isScrolling } = this;
+      return isScrolling ? Math.round(this.buttonsDisplayedCount / 2) : 0;
     },
     endScrolling() {
-      const { startScrolling, pageCount } = this;
-      return pageCount - startScrolling + 1;
+      const { startScrolling, pageCount, isScrolling } = this;
+      return isScrolling ? pageCount - startScrolling + 1 : 0;
+    },
+    isStart() {
+      const { currentPageNumber, startScrolling } = this;
+      return currentPageNumber <= startScrolling;
+    },
+    isEnd() {
+      const { currentPageNumber, endScrolling } = this;
+      return endScrolling > 0 && currentPageNumber >= endScrolling;
+    },
+    buttons() {
+      const { pageCount } = this;
+      return [...Array(pageCount).keys()].map((i) => i + 1);
     },
     displayedButtons() {
       const {
         isScrolling,
+        isStart,
+        isEnd,
         startScrolling,
-        endScrolling,
         pageCount,
+        buttons,
         buttonsDisplayedCount,
         currentPageNumber,
       } = this;
-      const range = { start: 0, end: buttonsDisplayedCount };
+      const range = { start: 0, end: pageCount };
 
-      if (!isScrolling) {
-        range.end = pageCount;
-      } else if (currentPageNumber > startScrolling) {
-        if (currentPageNumber < endScrolling) {
-          range.start = currentPageNumber - startScrolling;
-          range.end = range.start + buttonsDisplayedCount;
-        } else {
-          range.end = pageCount;
-          range.start = range.end - buttonsDisplayedCount;
-        }
+      if (isScrolling && isStart) {
+        range.end = buttonsDisplayedCount;
+      } else if (isScrolling && isEnd) {
+        range.start = range.end - buttonsDisplayedCount;
+      } else if (isScrolling) {
+        range.start = currentPageNumber - startScrolling;
+        range.end = range.start + buttonsDisplayedCount;
       }
-      return this.paymentsList.slice(range.start, range.end);
+      return buttons.slice(range.start, range.end);
     },
   },
   methods: {
