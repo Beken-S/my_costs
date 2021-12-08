@@ -12,7 +12,12 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapMutations, mapActions } from 'vuex';
+import {
+  mapState,
+  mapGetters,
+  mapMutations,
+  mapActions,
+} from 'vuex';
 import CustomButton from './CustomButton.vue';
 
 export default {
@@ -34,42 +39,66 @@ export default {
   },
   methods: {
     ...mapMutations(['addPageData', 'addPage', 'setCurrentPageNumber']),
-    ...mapActions(['fetchData']),
+    ...mapActions(['fetchData', 'fetchPageCount']),
     addPayment() {
       const {
-        category,
-        amount,
-        date,
-        currentDate,
         getPageByNumber,
         addPage,
         addPageData,
-        setCurrentPageNumber,
         fetchData,
+        fetchPageCount,
       } = this;
-
-      fetchData(this.pageCount).then(() => {
-        const lastPage = getPageByNumber(this.pageCount);
-        const dataLength = lastPage.data.length;
-        const lastItemId = lastPage.data[dataLength - 1].id;
-        const data = {
-          id: lastItemId + 1,
-          category,
-          amount: Number(amount),
-          date: date || currentDate,
-        };
-
-        if (dataLength === 5) {
-          addPage({ number: this.pageCount + 1, data: [data] });
-        } else {
-          addPageData({ number: this.pageCount, data });
-        }
-        setCurrentPageNumber(this.pageCount);
-      });
+      fetchPageCount()
+        .then((lastPageNumber) => fetchData(lastPageNumber))
+        .then(() => {
+          const {
+            pageCount,
+            category,
+            amount,
+            date,
+            currentDate,
+          } = this;
+          const lastPage = getPageByNumber(pageCount);
+          const dataLength = lastPage.data.length;
+          const lastItemId = lastPage.data[dataLength - 1].id;
+          const data = {
+            id: lastItemId + 1,
+            category,
+            amount: Number(amount),
+            date: date || currentDate,
+          };
+          if (dataLength < 5) {
+            addPageData({ number: pageCount, data });
+          } else {
+            addPage({ number: pageCount + 1, data: [data] });
+          }
+          return this.$router.push(
+            {
+              name: 'addPayment',
+              params: { page: this.pageCount, category },
+              query: { value: amount },
+            },
+          ).catch(() => {});
+        });
     },
   },
   components: {
     CustomButton,
+  },
+  mounted() {
+    const { $route: { name, params: { category }, query: { value } } } = this;
+    if (name === 'addPayment') {
+      if (category) {
+        this.category = category;
+      }
+      if (value) {
+        this.amount = value;
+      }
+      this.date = this.currentDate;
+      if (category && value) {
+        this.addPayment();
+      }
+    }
   },
 };
 </script>

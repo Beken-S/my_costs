@@ -27,6 +27,7 @@ const getters = {
     const page = getters.getPageByNumber(number);
     return page.data.length === 0;
   },
+  isCategoryListEmpty: (state) => state.categoryList.length === 0,
   isCurrentPage: (state) => (number) => state.currentPageNumber === number,
 };
 
@@ -51,6 +52,9 @@ const mutations = {
   setCategoryList(state, payload) {
     state.categoryList = [...payload];
   },
+  initPages(state, payload) {
+    state.paymentsList = [...Array(payload).keys()].map((i) => ({ number: i + 1, data: [] }));
+  },
 };
 
 const actions = {
@@ -69,18 +73,20 @@ const actions = {
       }
     });
   },
-  fetchPages({ commit }) {
+  fetchPageCount({ getters }) {
     return new Promise((resolve) => {
-      setTimeout(() => resolve(Object.keys(data).length), 1000);
-    }).then((pageCount) => {
-      for (let i = 1; i <= pageCount; i += 1) {
-        commit('addPage', { number: i, data: [] });
+      if (getters.pageCount === 0) {
+        setTimeout(() => resolve(Object.keys(data).length), 1000);
+      } else {
+        resolve(getters.pageCount);
       }
     });
   },
-  fetchCategory({ commit }) {
+  fetchCategory({ commit, getters }) {
     return new Promise((resolve) => {
-      setTimeout(() => resolve(['Food', 'Transport', 'Education', 'Entertainment']), 1000);
+      if (getters.isCategoryListEmpty) {
+        setTimeout(() => resolve(['Food', 'Transport', 'Education', 'Entertainment']), 1000);
+      }
     }).then((categoryList) => commit('setCategoryList', categoryList));
   },
 };
