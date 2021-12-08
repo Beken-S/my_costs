@@ -99,9 +99,8 @@ export default {
     ...mapMutations(['setCurrentPageNumber']),
     ...mapActions(['fetchData']),
     setPage(number) {
-      const { fetchData, setCurrentPageNumber } = this;
-      fetchData(number);
-      setCurrentPageNumber(number);
+      this.$router.push({ name: 'dashboardPage', params: { page: number } })
+        .catch(() => {});
     },
     setNextPage() {
       const { currentPageNumber, pageCount, setPage } = this;
