@@ -14,33 +14,35 @@
         />
       </svg>
     </button>
-    <ul :class="$style.menu" v-if="show">
-      <li :class="$style.item" @click="showForm">
-        <svg xmlns="http://www.w3.org/2000/svg"
-             width="1em"
-             viewBox="0 0 512.019 512.019"
-             fill="currentColor"
-        >
-          <path d="M350.316 80.852L0 431.166v80.843h80.841l350.316-350.316zm26.965-26.945
-            L431.174.013l80.841 80.841-53.894 53.894z"
-          />
-        </svg>
-        Редактировать
-      </li>
-      <li :class="$style.item" @click="deleteItem">
-        <svg xmlns="http://www.w3.org/2000/svg"
-             width="1em"
-             viewBox="0 0 512 512"
-             fill="currentColor"
-        >
-          <path d="M345.397 81.27V0H166.603v81.27H28.444v48.762h48.762V512h357.587V130.032
-            h48.762V81.27H345.397zM215.365 446.984h-48.762V154.413h48.762v292.571zm0-398.222
-            h81.27V81.27h-81.27V48.762zm130.032 398.222h-48.762V154.413h48.762v292.571z"
-          />
-        </svg>
-        Удалить
-      </li>
-    </ul>
+    <transition name="fade">
+      <ul :class="$style.menu" v-if="show">
+        <li :class="$style.item" @click="showForm">
+          <svg xmlns="http://www.w3.org/2000/svg"
+               width="1em"
+               viewBox="0 0 512.019 512.019"
+               fill="currentColor"
+          >
+            <path d="M350.316 80.852L0 431.166v80.843h80.841l350.316-350.316zm26.965-26.945
+              L431.174.013l80.841 80.841-53.894 53.894z"
+            />
+          </svg>
+          Редактировать
+        </li>
+        <li :class="$style.item" @click="deleteItem">
+          <svg xmlns="http://www.w3.org/2000/svg"
+               width="1em"
+               viewBox="0 0 512 512"
+               fill="currentColor"
+          >
+            <path d="M345.397 81.27V0H166.603v81.27H28.444v48.762h48.762V512h357.587V130.032
+              h48.762V81.27H345.397zM215.365 446.984h-48.762V154.413h48.762v292.571zm0-398.222
+              h81.27V81.27h-81.27V48.762zm130.032 398.222h-48.762V154.413h48.762v292.571z"
+            />
+          </svg>
+          Удалить
+        </li>
+      </ul>
+    </transition>
   </div>
 </template>
 
@@ -154,14 +156,5 @@ export default {
   &:active {
     color: #2c3e50;
   }
-}
-</style>
-
-<style lang="scss">
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.3s;
-}
-.fade-enter, .fade-leave-to {
-  opacity: 0;
 }
 </style>
