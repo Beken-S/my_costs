@@ -27,12 +27,41 @@
       <div :class="$style.container">
       </div>
     </footer>
+    <transition name="fade">
+      <modal-window v-if="showModal" :settings="settings"/>
+    </transition>
   </div>
 </template>
 
 <script>
+
 export default {
   name: 'BaseLayout',
+  components: {
+    ModalWindow: () => import(
+      /* webpackChunkName: "ModalWindow" */ '../components/ModalWindow.vue'
+    ),
+  },
+  data() {
+    return {
+      showModal: false,
+      settings: {},
+    };
+  },
+  beforeMount() {
+    this.$modal.EventBus.$on('show', this.modalOpen);
+    this.$modal.EventBus.$on('hide', this.modalClose);
+  },
+  methods: {
+    modalOpen(settings) {
+      this.settings = settings;
+      this.showModal = true;
+    },
+    modalClose() {
+      this.settings = {};
+      this.showModal = false;
+    },
+  },
 };
 </script>
 
@@ -78,5 +107,14 @@ export default {
   &:hover {
     background-color: #0e6c5f;
   }
+}
+</style>
+
+<style lang="scss">
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
 }
 </style>
