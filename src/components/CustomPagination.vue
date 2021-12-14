@@ -32,8 +32,6 @@
 import {
   mapState,
   mapGetters,
-  mapMutations,
-  mapActions,
 } from 'vuex';
 
 export default {
@@ -46,7 +44,7 @@ export default {
   },
   computed: {
     ...mapState(['currentPageNumber']),
-    ...mapGetters(['pageCount', 'isDataEmpty', 'isCurrentPage']),
+    ...mapGetters(['pageCount', 'isCurrentPage']),
     isScrolling() {
       const { buttonsDisplayedCount, pageCount } = this;
       return buttonsDisplayedCount < pageCount;
@@ -96,8 +94,6 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(['setCurrentPageNumber']),
-    ...mapActions(['fetchData']),
     setPage(number) {
       this.$router.push({ name: 'dashboardPage', params: { page: number } })
         .catch(() => {});

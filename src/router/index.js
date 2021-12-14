@@ -1,10 +1,5 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import Dashboard from '../pages/Dashboard.vue';
-import About from '../pages/About.vue';
-import NotFound from '../pages/NotFound.vue';
-import BaseLayout from '../pages/BaseLayout.vue';
-// import AddPaymentForm from '../components/AddPaymentForm.vue';
 
 Vue.use(Router);
 
@@ -28,12 +23,14 @@ const router = new Router({
     },
     {
       path: '/dashboard',
-      component: BaseLayout,
+      component: () => import(
+        /* webpackChunkName: "BaseLayout" */ '../pages/BaseLayout.vue'
+      ),
       children: [
         {
           path: ':page',
           name: 'dashboardPage',
-          component: Dashboard,
+          component: () => import(/* webpackChunkName: "Dashboard" */ '../pages/Dashboard.vue'),
           children: [
             {
               path: 'add/payment/:category',
@@ -45,19 +42,21 @@ const router = new Router({
     },
     {
       path: '/about',
-      component: BaseLayout,
+      component: () => import(
+        /* webpackChunkName: "BaseLayout" */ '../pages/BaseLayout.vue'
+      ),
       children: [
         {
           path: '',
           name: 'about',
-          component: About,
+          component: () => import(/* webpackChunkName: "About" */ '../pages/About.vue'),
         },
       ],
     },
     {
       path: '/404',
       name: 'notFound',
-      component: NotFound,
+      component: () => import(/* webpackChunkName: "NotFound" */ '../pages/NotFound.vue'),
     },
     {
       path: '*',

@@ -12,6 +12,9 @@ import CustomButton from './CustomButton.vue';
 
 export default {
   name: 'AddCategoryForm',
+  components: {
+    CustomButton,
+  },
   data() {
     return {
       category: '',
@@ -29,9 +32,6 @@ export default {
         addCategory(category);
       }
     },
-  },
-  components: {
-    CustomButton,
   },
 };
 </script>

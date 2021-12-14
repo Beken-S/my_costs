@@ -10,11 +10,11 @@
 </template>
 
 <script>
+
 export default {
   name: 'About',
 };
 </script>
 
-<style module lang="scss">
-
+<style lang="scss">
 </style>

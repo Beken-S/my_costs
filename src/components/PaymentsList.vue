@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div :class="$style.wrapper">
+    <div>
       <table :class="$style.list">
         <thead>
           <tr>
@@ -8,6 +8,7 @@
             <th>Description</th>
             <th>Date</th>
             <th>Amount</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -16,6 +17,13 @@
             <td>{{ item.category }}</td>
             <td>{{ item.date }}</td>
             <td>{{ item.amount }}</td>
+            <td :class="$style.menu">
+              <kebab-menu :id="item.id "
+                          :show="isCurrentKebabMenu(item.id)"
+                          @toggle-display="setCurrentKebabMenuId"
+                          @delete-item="deleteItem"
+              />
+            </td>
           </tr>
         </tbody>
       </table>
@@ -25,12 +33,15 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
 import CustomPagination from './CustomPagination.vue';
+import KebabMenu from './KebabMenu.vue';
 
 export default {
   name: 'PaymentsList',
   components: {
     CustomPagination,
+    KebabMenu,
   },
   props: {
     items: {
@@ -50,14 +61,33 @@ export default {
       },
     },
   },
+  data() {
+    return {
+      currentKebabMenuId: 0,
+    };
+  },
+  methods: {
+    ...mapActions(['deletePageData']),
+    setCurrentKebabMenuId(id) {
+      const { isCurrentKebabMenu } = this;
+      if (isCurrentKebabMenu(id)) {
+        this.currentKebabMenuId = 0;
+      } else {
+        this.currentKebabMenuId = id;
+      }
+    },
+    isCurrentKebabMenu(id) {
+      return this.currentKebabMenuId === id;
+    },
+    deleteItem(id) {
+      this.currentKebabMenuId = 0;
+      this.deletePageData(id);
+    },
+  },
 };
 </script>
 
 <style module lang="scss">
-.wrapper {
-  width: 100%;
-  overflow-x: auto;
-}
 .list {
   width: 100%;
   font-size: 1.25rem;
@@ -83,5 +113,8 @@ export default {
     padding: 0.5em;
     text-align: center;
   }
+}
+.menu {
+  width: min-content;
 }
 </style>

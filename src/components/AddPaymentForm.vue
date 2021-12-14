@@ -1,5 +1,6 @@
 <template>
-  <form :class="$style.form">
+<div>
+  <form :class="$style.form" v-if="showPaymentForm">
     <select :class="$style.input" v-model="category">
       <option v-for="category in categoryList" :value="category" :key="category">
         {{ category }}
@@ -7,8 +8,13 @@
     </select>
     <input :class="$style.input" type="text" placeholder="Payment amount" v-model.number="amount" />
     <input :class="$style.input" type="text" placeholder="Payment date" v-model="date" />
-    <custom-button :class="$style.button" @click="addPayment" add>Add</custom-button>
+    <custom-button :class="$style.buttonAddCategory" @click="openCategoryForm">
+      Add category
+    </custom-button>
+    <custom-button :class="$style.buttonAddPayment" @click="addPayment" add>Add</custom-button>
   </form>
+  <add-category-form v-if="showCategoryForm" @close="closeCategoryForm" />
+</div>
 </template>
 
 <script>
@@ -22,15 +28,23 @@ import CustomButton from './CustomButton.vue';
 
 export default {
   name: 'AddPaymentForm',
+  components: {
+    CustomButton,
+    AddCategoryForm: () => import(
+      /* webpackChunkName: "AddCategoryForm" */ './AddCategoryForm.vue'
+    ),
+  },
   data() {
     return {
       category: '',
       amount: null,
       date: '',
+      showPaymentForm: true,
+      showCategoryForm: false,
     };
   },
   computed: {
-    ...mapState(['categoryList']),
+    ...mapState(['categoryList', 'itemsPerPage']),
     ...mapGetters(['pageCount', 'getPageByNumber']),
     currentDate() {
       const date = new Date();
@@ -52,6 +66,7 @@ export default {
         .then((lastPageNumber) => fetchData(lastPageNumber))
         .then(() => {
           const {
+            itemsPerPage,
             pageCount,
             category,
             amount,
@@ -67,7 +82,7 @@ export default {
             amount: Number(amount),
             date: date || currentDate,
           };
-          if (dataLength < 5) {
+          if (dataLength < itemsPerPage) {
             addPageData({ number: pageCount, data });
           } else {
             addPage({ number: pageCount + 1, data: [data] });
@@ -81,9 +96,14 @@ export default {
           ).catch(() => {});
         });
     },
-  },
-  components: {
-    CustomButton,
+    openCategoryForm() {
+      this.showPaymentForm = false;
+      this.showCategoryForm = true;
+    },
+    closeCategoryForm() {
+      this.showPaymentForm = true;
+      this.showCategoryForm = false;
+    },
   },
   mounted() {
     const { $route: { name, params: { category }, query: { value } } } = this;
@@ -105,12 +125,12 @@ export default {
 
 <style module lang="scss">
 .form {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.25rem;
 }
 .input {
+  grid-column: 1/3;
   padding: 0.5em 1em;
   font-size: 1.25rem;
   color: #2c3e50;
@@ -122,8 +142,10 @@ export default {
     outline: 1px solid #2aa694;
   }
 }
-.button {
-  align-self: flex-end;
-  max-width: 150px;
+.buttonAddCategory {
+  grid-column: 1/2;
+}
+.buttonAddPayment {
+  grid-column: 2/3;
 }
 </style>
