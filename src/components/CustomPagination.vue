@@ -95,7 +95,7 @@ export default {
   },
   methods: {
     setPage(number) {
-      this.$router.push({ name: 'dashboardPage', params: { page: number } })
+      this.$router.push({ name: 'dashboard', params: { page: number } })
         .catch(() => {});
     },
     setNextPage() {

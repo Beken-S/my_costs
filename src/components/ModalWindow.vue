@@ -29,7 +29,7 @@ export default {
     close() {
       const { $route: { params: { page } } } = this;
       this.$modal.hide();
-      this.$router.push({ name: 'dashboardPage', params: { page } })
+      this.$router.push({ name: 'dashboard', params: { page } })
         .catch(() => {});
     },
   },
@@ -37,7 +37,6 @@ export default {
 </script>
 
 <style module lang="scss">
-@use "sass:math";
 .wrapper {
   position: absolute;
   top: 0;
@@ -52,7 +51,7 @@ export default {
 }
 .content {
   position: relative;
-  min-width: math.div(100%, 5);
+  min-width: 20%;
   padding: 56px;
   font-size: 1.25rem;
   color: #2c3e50;

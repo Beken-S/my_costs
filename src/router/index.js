@@ -8,11 +8,11 @@ const router = new Router({
   routes: [
     {
       path: '/',
-      redirect: { name: 'dashboardPage', params: { page: 1 } },
+      redirect: { name: 'dashboard', params: { page: 1 } },
     },
     {
       path: '/dashboard',
-      redirect: { name: 'dashboardPage', params: { page: 1 } },
+      redirect: { name: 'dashboard', params: { page: 1 } },
     },
     {
       path: '/add/payment/:category?',
@@ -22,36 +22,20 @@ const router = new Router({
       },
     },
     {
-      path: '/dashboard',
-      component: () => import(
-        /* webpackChunkName: "BaseLayout" */ '../pages/BaseLayout.vue'
-      ),
+      path: '/dashboard/:page',
+      name: 'dashboard',
+      component: () => import(/* webpackChunkName: "Dashboard" */ '../pages/Dashboard.vue'),
       children: [
         {
-          path: ':page',
-          name: 'dashboardPage',
-          component: () => import(/* webpackChunkName: "Dashboard" */ '../pages/Dashboard.vue'),
-          children: [
-            {
-              path: 'add/payment/:category',
-              name: 'addPayment',
-            },
-          ],
+          path: 'add/payment/:category',
+          name: 'addPayment',
         },
       ],
     },
     {
       path: '/about',
-      component: () => import(
-        /* webpackChunkName: "BaseLayout" */ '../pages/BaseLayout.vue'
-      ),
-      children: [
-        {
-          path: '',
-          name: 'about',
-          component: () => import(/* webpackChunkName: "About" */ '../pages/About.vue'),
-        },
-      ],
+      name: 'about',
+      component: () => import(/* webpackChunkName: "About" */ '../pages/About.vue'),
     },
     {
       path: '/404',
