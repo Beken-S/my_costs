@@ -37,6 +37,18 @@ function calcPageCount(items, itemsPerPage) {
   return Math.ceil(items.length / itemsPerPage);
 }
 
+function calcStatistics(items) {
+  return items.reduce((acc, items) => {
+    acc[items.category] = (acc[items.category] || 0) + items.amount;
+    return acc;
+  }, {});
+}
+
+function getStatistics(path) {
+  return readItems(path)
+    .then((_items) => calcStatistics(_items));
+}
+
 function getPage(path, itemsPerPage, pageNumber) {
   return readItems(path)
     .then((_items) => {
@@ -124,4 +136,6 @@ module.exports = {
   editPayment,
   getCategory,
   addCategory,
+  calcStatistics,
+  getStatistics,
 };

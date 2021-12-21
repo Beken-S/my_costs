@@ -9,6 +9,7 @@ const {
   editPayment,
   getCategory,
   addCategory,
+  getStatistics,
 } = require('./commonFunctions');
 
 const app = express();
@@ -41,6 +42,14 @@ app.get('/category', (req, res) => {
     .then((category) => {
       res.setHeader('Content-type', 'application/json');
       res.send(category);
+    });
+});
+
+app.get('/stat', (req, res) => {
+  getStatistics(PAYMENTS_PATH)
+    .then((stat) => {
+      res.setHeader('Content-type', 'application/json');
+      res.send(stat);
     });
 });
 

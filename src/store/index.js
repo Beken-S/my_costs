@@ -5,6 +5,7 @@ import {
   PAGE_COUNT,
   CATEGORY,
   PAYMENT,
+  STAT,
 } from '../constants';
 
 Vue.use(Vuex);
@@ -13,8 +14,9 @@ const state = () => ({
   paymentsList: [],
   currentPageNumber: 1,
   pageCount: 1,
-  itemsPerPage: 3,
+  itemsPerPage: 5,
   categoryList: [],
+  statistics: {},
 });
 
 const getters = {
@@ -59,6 +61,11 @@ const mutations = {
   },
   setCategoryList(state, payload) {
     state.categoryList = [...payload];
+  },
+  setStatistics(state, payload) {
+    const labels = Object.keys(payload);
+    const data = labels.map((category) => payload[category]);
+    state.statistics = { labels, data };
   },
 };
 
@@ -115,6 +122,18 @@ const actions = {
       .then((categoryList) => commit('setCategoryList', categoryList))
       .catch((err) => console.log(err));
   },
+  fetchStatistics({ commit }) {
+    return fetch(STAT, {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+        'Content-type': 'application/json',
+      },
+    })
+      .then((response) => response.json())
+      .then((statistics) => commit('setStatistics', statistics))
+      .catch((err) => console.log(err));
+  },
   addCategory(context, data) {
     return fetch(CATEGORY, {
       method: 'POST',
@@ -139,6 +158,7 @@ const actions = {
         if (!ok) {
           return new Error('Payment was not added.');
         }
+        dispatch('fetchStatistics');
         return dispatch('fetchPageCount');
       })
       .then(() => {
@@ -160,6 +180,7 @@ const actions = {
         if (!ok) {
           return new Error('Payment was not edit.');
         }
+        dispatch('fetchStatistics');
         return dispatch('fetchPage', state.currentPageNumber);
       })
       .catch((err) => console.log(err));
@@ -180,6 +201,7 @@ const actions = {
         if (state.currentPageNumber < state.pageCount) {
           commit('deletePage', state.pageCount);
         }
+        dispatch('fetchStatistics');
         return dispatch('fetchPageCount');
       })
       .then(() => {

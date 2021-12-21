@@ -14,7 +14,7 @@
         <payments-list :items="currentPageData" />
       </v-col>
       <v-col>
-        <DoughnutChart :chartData="testData" />
+        <DoughnutChart v-if="showChart" :chartData="statData" :options="chartOptions" />
       </v-col>
     </v-row>
   </v-container>
@@ -38,31 +38,45 @@ export default {
     AddPaymentForm,
     DoughnutChart,
   },
-  setup() {
-    const testData = {
-      labels: ['Paris', 'Nîmes', 'Toulon', 'Perpignan', 'Autre'],
-      datasets: [
-        {
-          data: [30, 40, 60, 70, 5],
-          backgroundColor: ['#77CEFF', '#0079AF', '#123E6B', '#97B0C4', '#A5C8ED'],
-        },
-      ],
-    };
-
-    return { testData };
-  },
   data() {
     return {
       dialog: false,
+      chartOptions: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'right',
+          },
+          title: {
+            display: true,
+            text: 'Costs by categories',
+          },
+        },
+      },
     };
   },
   computed: {
-    ...mapState(['currentPageNumber', 'pageCount']),
+    ...mapState(['currentPageNumber', 'pageCount', 'statistics']),
     ...mapGetters(['currentPageData', 'isPageLoaded']),
+    statData() {
+      const { statistics: { data, labels } } = this;
+      return {
+        labels,
+        datasets: [
+          {
+            data,
+            backgroundColor: ['#77CEFF', '#0079AF', '#123E6B', '#97B0C4', '#A5C8ED'],
+          },
+        ],
+      };
+    },
+    showChart() {
+      return this.statistics?.data?.length > 0;
+    },
   },
   methods: {
     ...mapMutations(['setCurrentPageNumber']),
-    ...mapActions(['fetchPageCount', 'fetchPage', 'fetchCategory']),
+    ...mapActions(['fetchPageCount', 'fetchPage', 'fetchCategory', 'fetchStatistics']),
     closeForm() {
       const page = Number(this.$route.params.page);
       this.dialog = false;
@@ -86,7 +100,9 @@ export default {
     },
   },
   created() {
-    this.fetchCategory();
+    const { fetchCategory, fetchStatistics } = this;
+    fetchCategory();
+    fetchStatistics();
   },
   beforeRouteEnter(to, from, next) {
     next((vm) => {
@@ -96,7 +112,6 @@ export default {
         fetchPageCount,
         setCurrentPageNumber,
       } = vm;
-      // console.log('enter', to.params.page);
       const page = Number(to.params.page);
       fetchPageCount()
         .then(() => {
@@ -109,7 +124,6 @@ export default {
     });
   },
   beforeRouteUpdate(to, from, next) {
-    // console.log('update', to.params.page);
     const page = Number(to.params.page);
     if (to.name === 'dashboard') {
       this.getPage(page);
