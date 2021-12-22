@@ -2,10 +2,14 @@
   <v-container>
     <h1 class="text-h5 text-sm-h4 mb-8">My personal payments</h1>
     <v-row>
-      <v-col>
+      <v-col cols="12" sm="12" md="6">
         <v-dialog v-model="dialog" max-width="500" persistent>
           <template v-slot:activator="{ on }">
-            <v-btn class="mb-6" color="teal" dark v-on="on">
+            <v-btn
+              class="mb-6"
+              color="teal"
+              dark
+              v-on="on">
               Add new costs <v-icon>mdi-plus</v-icon>
             </v-btn>
           </template>
@@ -13,8 +17,17 @@
         </v-dialog>
         <payments-list :items="currentPageData" />
       </v-col>
-      <v-col>
-        <DoughnutChart v-if="showChart" :chartData="statData" :options="chartOptions" />
+      <v-col
+        class="d-none d-sm-flex justify-center"
+        cols="12"
+        sm="12"
+        md="6"
+      >
+        <DoughnutChart
+          v-if="showChart"
+          :chartData="statData"
+          :options="chartOptions"
+        />
       </v-col>
     </v-row>
   </v-container>
@@ -28,6 +41,7 @@ import {
   mapActions,
 } from 'vuex';
 import { DoughnutChart } from 'vue-chart-3';
+import { interpolateSpectral } from 'd3-scale-chromatic';
 import PaymentsList from '../components/PaymentsList.vue';
 import AddPaymentForm from '../components/AddPaymentForm.vue';
 
@@ -41,15 +55,32 @@ export default {
   data() {
     return {
       dialog: false,
+      colorRangeOptions: {
+        colorStart: 0.3,
+        colorEnd: 1,
+        useEndAsStart: true,
+      },
       chartOptions: {
-        responsive: true,
+        responsive: false,
         plugins: {
           legend: {
             position: 'right',
+            labels: {
+              font: {
+                size: 14,
+              },
+            },
           },
           title: {
             display: true,
-            text: 'Costs by categories',
+            text: 'COSTS BY CATEGORIES',
+            padding: {
+              top: 12,
+              bottom: 10,
+            },
+            font: {
+              size: 16,
+            },
           },
         },
       },
@@ -59,13 +90,28 @@ export default {
     ...mapState(['currentPageNumber', 'pageCount', 'statistics']),
     ...mapGetters(['currentPageData', 'isPageLoaded']),
     statData() {
-      const { statistics: { data, labels } } = this;
+      const {
+        colorRangeOptions: { colorStart, colorEnd, useEndAsStart },
+        statistics: { data, labels },
+      } = this;
+      const dataLength = data.length;
+      const colorRange = colorEnd - colorStart;
+      const intervalSize = colorRange / dataLength;
+      const colorArray = data.map((el, index) => {
+        let colorPoint = null;
+        if (useEndAsStart) {
+          colorPoint = colorEnd - (index * intervalSize);
+        } else {
+          colorPoint = colorStart + (index * intervalSize);
+        }
+        return interpolateSpectral(colorPoint);
+      });
       return {
         labels,
         datasets: [
           {
             data,
-            backgroundColor: ['#77CEFF', '#0079AF', '#123E6B', '#97B0C4', '#A5C8ED'],
+            backgroundColor: colorArray,
           },
         ],
       };
