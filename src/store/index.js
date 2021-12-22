@@ -14,7 +14,7 @@ const state = () => ({
   paymentsList: [],
   currentPageNumber: 1,
   pageCount: 1,
-  itemsPerPage: 5,
+  itemsPerPage: 10,
   categoryList: [],
   statistics: {},
 });

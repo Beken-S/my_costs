@@ -7,12 +7,29 @@
     <v-container class="pa-0" fluid>
       <v-row>
         <v-col cols="12" xs="12" sm="8" >
-          <v-select v-model="category" label="Category" :items="categoryList" />
+          <v-select
+            color="teal"
+            item-color="teal"
+            v-model="category"
+            label="Category"
+            :items="categoryList"
+          />
         </v-col>
-        <v-col class="d-flex" cols="12" xs="12" sm="4" align-self="center">
+        <v-col
+          class="d-flex"
+          align-self="center"
+          cols="12"
+          xs="12"
+          sm="4"
+        >
           <v-dialog v-model="dialog" max-width="500" persistent>
             <template v-slot:activator="{ on }">
-              <v-btn class="flex-grow-1" color="teal" dark   v-on="on">
+              <v-btn
+                class="flex-grow-1"
+                color="teal"
+                dark
+                v-on="on"
+              >
                 Add category
               </v-btn>
             </template>
@@ -20,10 +37,57 @@
           </v-dialog>
         </v-col>
         <v-col cols="12" xs="12" >
-          <v-text-field v-model="date" label="Date" />
+          <v-menu
+            ref="menu"
+            v-model="menu"
+            :close-on-content-click="false"
+            :return-value.sync="date"
+            transition="scale-transition"
+            offset-y
+            min-width="auto"
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <v-text-field
+                color="teal"
+                append-icon="mdi-calendar"
+                v-model="date"
+                label="Date"
+                readonly
+                v-bind="attrs"
+                v-on="on"
+              />
+            </template>
+            <v-date-picker
+              color="teal"
+              v-model="date"
+              no-title
+              scrollable
+            >
+              <v-spacer></v-spacer>
+              <v-btn
+                text
+                color="teal"
+                @click="menu = false"
+              >
+                Cancel
+              </v-btn>
+              <v-btn
+                text
+                color="teal"
+                @click="$refs.menu.save(date)"
+              >
+                OK
+              </v-btn>
+            </v-date-picker>
+          </v-menu>
         </v-col>
         <v-col cols="12" xs="12" >
-          <v-text-field v-model="amount" label="Amount" />
+          <v-text-field
+            color="teal"
+            v-model="amount"
+            label="Amount"
+            type="number"
+          />
         </v-col>
       </v-row>
     </v-container>
@@ -51,13 +115,14 @@ export default {
       amount: null,
       date: '',
       dialog: false,
+      menu: false,
     };
   },
   computed: {
     ...mapState(['categoryList', 'pageCount']),
     currentDate() {
       const date = new Date();
-      return date.toLocaleDateString();
+      return date.toISOString().substring(0, 10);
     },
   },
   methods: {

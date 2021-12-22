@@ -4,7 +4,7 @@
     <span class="text-h5">Add category</span>
   </v-card-title>
   <v-card-text>
-    <v-text-field v-model="category" label="Category" />
+    <v-text-field color="teal" v-model="category" label="Category" />
   </v-card-text>
   <v-card-actions>
     <v-btn color="teal" text @click="add">Add</v-btn>
